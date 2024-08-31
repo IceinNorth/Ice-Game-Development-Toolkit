@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;//正则表达式命名空间
 using UnityEngine;
-
+ 
 //------------------------------------------------------------
 // 作者名：一冰在北
 // GitHub项目地址：https://github.com/IceinNorth/Ice-Game-Development-Toolkit
 // 邮箱：wu2687180662@icloud.com
+// MIT License
 //------------------------------------------------------------
-
+ 
 public class LevelManager : MonoBehaviour
 {
     public Transform PlayerTr;
@@ -17,11 +18,11 @@ public class LevelManager : MonoBehaviour
     private Action ActiveAction; //关卡切换事件
     private List<GameObject> loadedLevelList; //已加载关卡列表
     private GameObject[] levels; //文件中的所有关卡
-
+ 
     private Vector2Int oldIndex; //上一个关卡索引：用于防止切换后上一个关卡被卸载
-    private Vector2Int nowIndex; //以坐标为形式的当前关卡索引
+    public Vector2Int nowIndex; //以坐标为形式的当前关卡索引
     private bool IsNotVisableInCamera; //玩家是否离开视线范围
-
+ 
     void OnEnable()
     {
         //事件订阅
@@ -29,14 +30,18 @@ public class LevelManager : MonoBehaviour
         ActiveAction += LoadLevels;
         ActiveAction += SetLevelActive;
     }
-
+ 
     void Start()
     {
         DontDestroyOnLoad(this); //非必须
         //实例化
-        Camera = Camera.main; //获取主摄像机，使用时也可通过其他方法获取
-        PlayerTr = GameObject.FindWithTag("Player").transform; //这里使用名为”Player“的标签来获取玩家的transform组件，使用时也可用其他方法
-        ActiveLevel = GameObject.FindWithTag("Levels"); //这里使用名为”Levels“的标签来获取第一个关卡，使用时也可用其他方法来获取第一个关卡
+        //获取主摄像机，也可以通过Inspector面板拖拽获取
+        Camera =Camera == null? Camera.main:Camera;
+        //这里使用名为“Player”的标签来获取玩家的transform组件，也可以通过Inspector面板拖拽获取
+        PlayerTr = PlayerTr == null? GameObject.FindWithTag("Player").transform:PlayerTr; 
+        //这里会获取场景中标签为“Level”的物体，也可以通过Inspector面板拖拽获取
+        ActiveLevel = ActiveLevel == null? GameObject.FindWithTag("Levels"):ActiveLevel; 
+        levels = Resources.LoadAll<GameObject>("Levels"); //需要在Assets中创建Resource文件夹并在其中创建关卡文件夹，关卡文件夹名字自定，这里使用“Levels”
         levels = Resources.LoadAll<GameObject>("Levels"); //需要在Assets中创建Resource文件夹并在其中创建关卡文件夹，关卡文件夹名字自定，这里使用”Levels“
         loadedLevelList = new List<GameObject>();
         //初始化
@@ -44,7 +49,7 @@ public class LevelManager : MonoBehaviour
         nowIndex = GetIndex(ActiveLevel); //获取当前关卡索引
         ActiveAction(); //初始化
     }
-
+ 
     // Update is called once per frame
     void Update()
     {
@@ -55,7 +60,7 @@ public class LevelManager : MonoBehaviour
             ActiveAction();
         }
     }
-
+ 
     private Vector2Int SwitchPlayer(Transform transform,Vector2Int index)
     {
         //当玩家离开视线后返回新索引
@@ -96,7 +101,7 @@ public class LevelManager : MonoBehaviour
         transform.position = pos; //坐标在函数内部更新后再赋给position
         return index; //返回更新后的索引
     }
-
+ 
     
     private Vector2Int GetIndex(GameObject Level)
     {
@@ -120,7 +125,7 @@ public class LevelManager : MonoBehaviour
         } 
         return index; //返回得到的索引
     }
-
+ 
     private void LoadLevels()
     {
         //加载四个方向上的关卡
@@ -140,7 +145,7 @@ public class LevelManager : MonoBehaviour
                     levelInList = true;
                 }
             }
-
+ 
             if (!levelInList)
             {
                 foreach (GameObject i in levels)
@@ -158,7 +163,7 @@ public class LevelManager : MonoBehaviour
             }
         }
     }
-
+ 
     private void UnloadLevels()
     {
         //卸载关卡
